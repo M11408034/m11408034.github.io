@@ -153,6 +153,7 @@
             drawSciFiSkeleton(hand, gx, gy, handColor);
             drawFingertips(hand, gx, gy, handColor);
             drawHoloDial(hand, i, gx, gy, handColor);
+            drawDataStreams(hand, gx, gy, handColor);
             drawCursor(tx, ty, handColor);
           }
 
@@ -169,6 +170,7 @@
           linkOsc.amp(0, 0.5);
           drawScanningUI();
         }
+        drawScanlines();
         drawVirtualButtons(gx, gy);
       }
 
@@ -260,6 +262,35 @@
 
       function drawScanningUI() {
         stroke(mainColor, 60); line(0, (frameCount*4)%height, width, (frameCount*4)%height);
+      }
+
+      function drawScanlines() {
+        stroke(0, 50); strokeWeight(1);
+        for (let i = 0; i < height; i += 4) { line(0, i, width, i); }
+        // Subtle noise
+        if (frameCount % 2 === 0) {
+            noFill(); stroke(255, 5);
+            for (let i = 0; i < 10; i++) { point(random(width), random(height)); }
+        }
+      }
+
+      function drawDataStreams(hand, gx, gy, handColor) {
+        let wrist = hand.keypoints[0];
+        let x = map(wrist.x, 0, 640, 0, width) + gx;
+        let y = map(wrist.y, 0, 480, 0, height) + gy;
+        
+        fill(handColor); textAlign(LEFT); textSize(10);
+        let data = ["SYS_LINK: ACTIVE", "LATENCY: 12ms", "BUFFER: OPTIMAL", "ENCRYPT: AES-256"];
+        for(let i = 0; i < data.length; i++) {
+          let alpha = 100 + sin(frameCount * 10 + i * 50) * 50;
+          fill(red(handColor), green(handColor), blue(handColor), alpha);
+          text(data[i], x + 70, y - 40 + i * 12);
+        }
+        // Floating bits
+        if (frameCount % 5 === 0) {
+          fill(255, 100);
+          text(random(['0', '1']), x + random(50, 100), y + random(-100, 100));
+        }
       }
 
       function windowResized() { resizeCanvas(windowWidth, windowHeight); }
